@@ -174,10 +174,11 @@ class KLCoeffMixin:
         self.kl_target = config["kl_target"]
 
     def update_kl(self, sampled_kl):
-        if sampled_kl > 2.0 * self.kl_target:
-            self.kl_coeff *= 1.5
-        elif sampled_kl < 0.5 * self.kl_target:
-            self.kl_coeff *= 0.5
+        # don't update kl
+        #if sampled_kl > 2.0 * self.kl_target:
+            #self.kl_coeff *= 1.5
+        #elif sampled_kl < 0.5 * self.kl_target:
+            #self.kl_coeff *= 0.5
         return self.kl_coeff
 
 
