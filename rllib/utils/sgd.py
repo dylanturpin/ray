@@ -10,6 +10,8 @@ from ray.rllib.evaluation.metrics import LEARNER_STATS_KEY
 from ray.rllib.policy.sample_batch import SampleBatch, DEFAULT_POLICY_ID, \
     MultiAgentBatch
 
+import torch
+
 logger = logging.getLogger(__name__)
 
 
@@ -27,7 +29,10 @@ def averaged(kv, axis=None):
     out = {}
     for k, v in kv.items():
         if v[0] is not None and not isinstance(v[0], dict):
-            out[k] = np.mean(v, axis=axis)
+            if torch.is_tensor(v) or torch.is_tensor(v[0]):
+                out[k] = torch.tensor(v).mean()
+            else:
+                out[k] = np.mean(v, axis=axis)
         else:
             out[k] = v[0]
     return out
