@@ -250,9 +250,9 @@ def get_preprocessor(space):
     legacy_patch_shapes(space)
     obs_shape = space.shape
 
-    if isinstance(space, gym.spaces.Discrete):
-        preprocessor = OneHotPreprocessor
-    elif obs_shape == ATARI_OBS_SHAPE:
+    #if isinstance(space, gym.spaces.Discrete):
+        #preprocessor = OneHotPreprocessor
+    if obs_shape == ATARI_OBS_SHAPE:
         preprocessor = GenericPixelPreprocessor
     elif obs_shape == ATARI_RAM_OBS_SHAPE:
         preprocessor = AtariRamPreprocessor
