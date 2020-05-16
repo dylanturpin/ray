@@ -213,12 +213,25 @@ def setup_mixins(policy, obs_space, action_space, config):
                                   config["entropy_coeff_schedule"])
     LearningRateSchedule.__init__(policy, config["lr"], config["lr_schedule"])
 
+# ADD CUSTOM LOSS AND CUSTOM METRICS
+def surrogate_plus_custom_loss(policy, model, dist_class, train_batch):
+    policy_loss = ppo_surrogate_loss(policy, model, dist_class, train_batch)
+    loss_input_dict = {}
+    custom_loss = model.custom_loss(policy_loss, loss_input_dict)
+    return policy_loss + custom_loss
+
+def kl_and_loss_and_custom_loss_stats(policy, train_batch):
+    kl_and_loss_stats_dict = kl_and_loss_stats(policy, train_batch)
+    custom_metrics = policy.model.metrics()
+    kl_and_loss_stats_dict['custom_metrics'] = custom_metrics
+    return kl_and_loss_stats_dict
 
 PPOTorchPolicy = build_torch_policy(
     name="PPOTorchPolicy",
     get_default_config=lambda: ray.rllib.agents.ppo.ppo.DEFAULT_CONFIG,
-    loss_fn=ppo_surrogate_loss,
-    stats_fn=kl_and_loss_stats,
+    #loss_fn=ppo_surrogate_loss,
+    loss_fn=surrogate_plus_custom_loss,
+    stats_fn=kl_and_loss_and_custom_loss_stats,
     extra_action_out_fn=vf_preds_fetches,
     postprocess_fn=postprocess_ppo_gae,
     extra_grad_process_fn=apply_grad_clipping,
