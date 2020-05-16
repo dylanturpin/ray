@@ -221,6 +221,14 @@ class TorchSquashedGaussian(TorchDistributionWrapper):
         log_prob = log_prob_gaussian - torch.sum(
             torch.log(1 - unsquashed_values_tanhd**2 + SMALL_NUMBER), dim=-1)
         return log_prob
+        
+    @override(TorchDistributionWrapper)
+    def entropy(self):
+        return super().entropy().sum(-1)
+
+    @override(TorchDistributionWrapper)
+    def kl(self, other):
+        return super().kl(other).sum(-1)
 
     def _squash(self, raw_values):
         # Returned values are within [low, high] (including `low` and `high`).
