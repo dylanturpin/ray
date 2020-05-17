@@ -204,8 +204,15 @@ class TorchSquashedGaussian(TorchDistributionWrapper):
         # Use the reparameterization version of `dist.sample` to allow for
         # the results to be backprop'able e.g. in a loss term.
         normal_sample = self.dist.rsample()
+        self.last_sample_unsquashed = normal_sample
         self.last_sample = self._squash(normal_sample)
         return self.last_sample
+
+    @override(ActionDistribution)
+    def sampled_action_logp(self):
+        assert self.last_sample_unsquashed is not None
+        log_prob_gaussian = self.dist.log_prob(self.last_sample_unsquashed).sum(-1)
+        return log_prob_gaussian
 
     @override(ActionDistribution)
     def logp(self, x):
@@ -221,7 +228,7 @@ class TorchSquashedGaussian(TorchDistributionWrapper):
         log_prob = log_prob_gaussian - torch.sum(
             torch.log(1 - unsquashed_values_tanhd**2 + SMALL_NUMBER), dim=-1)
         return log_prob
-        
+
     @override(TorchDistributionWrapper)
     def entropy(self):
         return super().entropy().sum(-1)
