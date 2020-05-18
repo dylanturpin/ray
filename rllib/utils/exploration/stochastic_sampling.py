@@ -69,9 +69,9 @@ class StochasticSampling(Exploration):
     @staticmethod
     def _get_torch_exploration_action(action_dist, explore):
         if explore:
-            action = action_dist.sample()
+            action, unsquashed_actions = action_dist.sample()
             logp = action_dist.sampled_action_logp()
         else:
-            action = action_dist.deterministic_sample()
+            action, unsquashed_actions = action_dist.deterministic_sample()
             logp = torch.zeros((action.size()[0], ), dtype=torch.float32)
-        return action, logp
+        return action, logp, unsquashed_actions

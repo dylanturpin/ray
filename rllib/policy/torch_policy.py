@@ -152,7 +152,7 @@ class TorchPolicy(Policy):
                 action_dist = dist_class(dist_inputs, self.model)
 
                 # Get the exploration action from the forward results.
-                actions, logp = \
+                actions, logp, unsquashed_actions = \
                     self.exploration.get_exploration_action(
                         action_distribution=action_dist,
                         timestep=timestep,
@@ -168,6 +168,8 @@ class TorchPolicy(Policy):
                 logp = convert_to_non_torch_type(logp)
                 extra_fetches[SampleBatch.ACTION_PROB] = np.exp(logp)
                 extra_fetches[SampleBatch.ACTION_LOGP] = logp
+            unsquashed_actions = convert_to_non_torch_type(unsquashed_actions)
+            extra_fetches[SampleBatch.UNSQUASHED_ACTIONS] = unsquashed_actions
             # Action-dist inputs.
             if dist_inputs is not None:
                 extra_fetches[SampleBatch.ACTION_DIST_INPUTS] = dist_inputs

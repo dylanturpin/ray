@@ -21,6 +21,7 @@ class SampleBatch:
     CUR_OBS = "obs"
     NEXT_OBS = "new_obs"
     ACTIONS = "actions"
+    UNSQUASHED_ACTIONS = "unsquashed_actions"
     REWARDS = "rewards"
     PREV_ACTIONS = "prev_actions"
     PREV_REWARDS = "prev_rewards"

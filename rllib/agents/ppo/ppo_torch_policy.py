@@ -25,6 +25,7 @@ class PPOLoss:
                  value_targets,
                  advantages,
                  actions,
+                 unsquashed_actions,
                  prev_logits,
                  prev_actions_logp,
                  vf_preds,
@@ -79,7 +80,7 @@ class PPOLoss:
         prev_dist = dist_class(prev_logits, model)
         # Make loss functions.
         logp_ratio = torch.exp(
-            curr_action_dist.logp(actions) - prev_actions_logp)
+            curr_action_dist.unsquashed_logp(unsquashed_actions) - prev_actions_logp)
         action_kl = prev_dist.kl(curr_action_dist)
         self.mean_kl = reduce_mean_valid(action_kl)
 
@@ -126,6 +127,7 @@ def ppo_surrogate_loss(policy, model, dist_class, train_batch):
         train_batch[Postprocessing.VALUE_TARGETS],
         train_batch[Postprocessing.ADVANTAGES],
         train_batch[SampleBatch.ACTIONS],
+        train_batch[SampleBatch.UNSQUASHED_ACTIONS],
         train_batch[SampleBatch.ACTION_DIST_INPUTS],
         train_batch[SampleBatch.ACTION_LOGP],
         train_batch[SampleBatch.VF_PREDS],

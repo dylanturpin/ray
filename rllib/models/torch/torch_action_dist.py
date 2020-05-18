@@ -197,7 +197,8 @@ class TorchSquashedGaussian(TorchDistributionWrapper):
     @override(ActionDistribution)
     def deterministic_sample(self):
         self.last_sample = self._squash(self.dist.mean)
-        return self.last_sample
+        self.last_sample_unsquashed = self.dist.mean
+        return self.last_sample, self.last_sample_unsquashed
 
     @override(TorchDistributionWrapper)
     def sample(self):
@@ -206,12 +207,16 @@ class TorchSquashedGaussian(TorchDistributionWrapper):
         normal_sample = self.dist.rsample()
         self.last_sample_unsquashed = normal_sample
         self.last_sample = self._squash(normal_sample)
-        return self.last_sample
+        return self.last_sample, self.last_sample_unsquashed
 
     @override(ActionDistribution)
     def sampled_action_logp(self):
         assert self.last_sample_unsquashed is not None
         log_prob_gaussian = self.dist.log_prob(self.last_sample_unsquashed).sum(-1)
+        return log_prob_gaussian
+
+    def unsquashed_logp(self, unsquashed_sample):
+        log_prob_gaussian = self.dist.log_prob(unsquashed_sample).sum(-1)
         return log_prob_gaussian
 
     @override(ActionDistribution)
